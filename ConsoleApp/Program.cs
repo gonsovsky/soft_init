@@ -6,53 +6,56 @@ using System.Threading.Tasks;
 using Jurassic;
 using System.IO;
 using System.Data.SqlClient;
-using prototypeExpander;
+using Jurassic.Library;
+using JsMan;
+using JsdvApi32;
+using System.Diagnostics;
 
 namespace ConsoleApp
 {
     class Program
     {
-        const string defscript = "../../def.js";
-
         static void Main(string[] args)
         {
-            var file = args.Length >= 1 ? args[0] : defscript;
-            Console.WriteLine($"C# started script: {file}");
-            var src = File.ReadAllText(file);
-            Run(src);
-            Console.ReadKey();
-        }
+            var engine = new Jurassic.ScriptEngine();
 
-        public static void Run(string script)
-        {
+            new Dictionary<string, ObjectInstance>
+            {
+                {"console", new Jurassic.Library.FirebugConsole(engine) },
+                {"advapi32", new JsConstructor<AdvApi32>(engine) }
+            }
+            .ToList()
+            .ForEach(x => engine.SetGlobalValue(x.Key, x.Value));
+
+            var file = "";
+            #if DEBUG
+                file = args.Length >= 1 ? args[0] : "../../def.js";
+            #else
+                if (args.Length < 0){
+                    Console.WriteLine("error");
+                    return;
+                }
+                file = args[0];
+            #endif
+
             try
             {
-                var result = Engine.Evaluate(script);
-                Console.WriteLine($"C# finished and said: {result}");
+                var result = engine.Evaluate<CreateServiceOut>(File.ReadAllText(file));
+                var x = result.Message;
+                Console.WriteLine($"C# Result: {result.Result}");
+                Console.WriteLine($"C# ErrorCode: {result.ErrorCode}");
+                Console.WriteLine($"C# Message: {result.Message}");
+            }
+            catch(JavaScriptException e)
+            {
+                Console.WriteLine("C# JavaScriptException: " + e.Message);
             }
             catch(Exception e)
             {
-                Console.WriteLine($"C# Failure:{e.Message}\r\n{e.StackTrace}");
+                Console.WriteLine("C# Exception: " + e.Message);
             }
-        }
 
-        private static ScriptEngine engine = null;
-        private static readonly object threadlock = new object();
-        public static ScriptEngine Engine
-        {
-            get
-            {
-                lock (threadlock)
-                {
-                    if (engine == null)
-                    {
-                        engine = new Jurassic.ScriptEngine();
-                        Engine.SetGlobalValue("console", new Jurassic.Library.FirebugConsole(Engine));
-                        engine.SetGlobalValue("ExpandedPrototype", new PrototypeConstructor(engine));
-                    }
-                    return engine;
-                }
-            }
+            Console.ReadKey();
         }
     }
 }

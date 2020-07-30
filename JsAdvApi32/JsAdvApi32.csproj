@@ -34,6 +34,7 @@
       <HintPath>..\packages\Jurassic.3.1.0\lib\net45\Jurassic.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -45,15 +46,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="constructor.cs" />
-    <Compile Include="nt_service.cs" />
-    <Compile Include="prototype.cs">
+    <Compile Include="CreateServiceOut.cs" />
+    <Compile Include="CreateServiceIn.cs" />
+    <Compile Include="AdvApi32.cs">
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JsMan\JsMan.csproj">
+      <Project>{cff65c3b-a104-4a5c-815c-1cc3e09de62a}</Project>
+      <Name>JsMan</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
